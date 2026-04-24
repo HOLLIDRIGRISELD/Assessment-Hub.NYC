@@ -15,7 +15,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // --- Getters and Setters ---
+    //Setter and Getter
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
