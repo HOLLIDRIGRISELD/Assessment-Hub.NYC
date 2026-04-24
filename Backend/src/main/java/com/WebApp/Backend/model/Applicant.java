@@ -20,7 +20,7 @@ public class Applicant {
     private String aiClassification;
     private String status;
 
-    // --- Getters and Setters ---
+    //Setter and Getter
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
