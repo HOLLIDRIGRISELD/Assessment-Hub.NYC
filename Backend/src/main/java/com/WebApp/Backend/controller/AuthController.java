@@ -3,23 +3,23 @@ import com.WebApp.Backend.model.User;
 import com.WebApp.Backend.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
-// HANDLES LOGIN AND REGISTER
+// HANDLES USER AUTHENTICATION LOGIC
 @RestController
-// DEFINES BASE API ROUTE FOR AUTHENTICATION
 @RequestMapping("/api/auth")
-// ALLOWS REQUESTS FROM REACT FRONTEND
 @CrossOrigin(origins = "*")
-
-
 public class AuthController {
     @Autowired
-    // INJECTS USER REPOSITORY FOR DATABASE ACCESS
+    // PROVIDES ACCESS TO USER DATABASE OPERATIONS
     private UserRepo userRepository;
+    @Autowired
+    // HANDLES PASSWORD HASHING AND VERIFICATION USING BCRYPT
+    private PasswordEncoder passwordEncoder;
 
-    // REGISTERS A NEW USER ACCOUNT
+    // REGISTERS A NEW USER WITH ENCRYPTED PASSWORD
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
 
@@ -28,24 +28,26 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Error: Username already exists!");
         }
 
-        // SAVES NEW USER TO DATABASE
+        // HASHES PASSWORD BEFORE STORING IN DATABASE
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashedPassword);
+
         userRepository.save(user);
         return ResponseEntity.ok("User registered successfully!");
     }
 
-    // AUTHENTICATES USER LOGIN CREDENTIALS
+    // AUTHENTICATES USER LOGIN USING HASHED PASSWORD COMPARISON
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody User loginDetails) {
 
-        // RETRIEVES USER BY USERNAME
+        // FINDS USER BY USERNAME
         Optional<User> user = userRepository.findByUsername(loginDetails.getUsername());
 
-        // VALIDATES USERNAME AND PASSWORD
-        if (user.isPresent() && user.get().getPassword().equals(loginDetails.getPassword())) {
+        // VALIDATES PASSWORD AGAINST STORED HASH
+        if (user.isPresent() &&
+                passwordEncoder.matches(loginDetails.getPassword(), user.get().getPassword())) {
             return ResponseEntity.ok("Login successful!");
         }
-
-        // RETURNS ERROR IF AUTHENTICATION FAILS
         return ResponseEntity.badRequest().body("Error: Invalid username or password!");
     }
 }
