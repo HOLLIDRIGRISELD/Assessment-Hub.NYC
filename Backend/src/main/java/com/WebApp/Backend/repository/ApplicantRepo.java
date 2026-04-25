@@ -4,6 +4,8 @@ import com.WebApp.Backend.model.Applicant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+// DEFINES REPOSITORY INTERFACE FOR APPLICANT DATABASE OPERATIONS
 @Repository
 public interface ApplicantRepo extends JpaRepository<Applicant, Long> {
+    // INHERITS STANDARD CRUD METHODS FROM JPA REPOSITORY
 }
