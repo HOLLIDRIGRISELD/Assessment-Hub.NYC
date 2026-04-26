@@ -5,38 +5,40 @@ import DashboardTab from './DashboardTab';
 // MAIN DASHBOARD COMPONENT WITH TAB-BASED NAVIGATION
 function Dashboard({ username, onLogout }) {
 
-  // TRACKS CURRENTLY SELECTED DASHBOARD TAB (Changed default to 'dashboard')
+  // TRACKS CURRENTLY ACTIVE TAB (DEFAULT SET TO DASHBOARD)
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // RENDERS CONTENT BASED ON ACTIVE TAB SELECTION
+  // SELECTS AND RENDERS CONTENT BASED ON ACTIVE TAB
   const renderContent = () => {
     switch (activeTab) {
 
-      // DISPLAYS THE MAIN DASHBOARD TAB
+      // DISPLAYS MAIN DASHBOARD WITH LIVE DATA
       case 'dashboard':
         return <DashboardTab />;
 
-      // DISPLAYS APPLICANT DATABASE SECTION
+      // DISPLAYS APPLICANT MANAGEMENT INTERFACE
       case 'applicants':
         return <ApplicantsTab />;
 
-      // DISPLAYS AI UNDERWRITER SECTION
+      // DISPLAYS PLACEHOLDER FOR AI FEATURE
       case 'ai':
         return <div><h2> AI Underwriter</h2><p>Python AI connection will go here.</p></div>;
 
-      // DISPLAYS USER SETTINGS AND LOGOUT OPTION
+      // DISPLAYS USER INFO AND LOGOUT OPTION
       case 'settings':
         return (
           <div>
             <h2> Officer Settings</h2>
             <p>Logged in as: <strong>{username}</strong></p>
+
+            {/* TRIGGERS USER LOGOUT */}
             <button onClick={onLogout} style={{ marginTop: '10px', color: 'red' }}>
               Secure Log Out
             </button>
           </div>
         );
 
-      // DEFAULT FALLBACK IF NO TAB IS SELECTED
+      // FALLBACK CONTENT IF NO TAB MATCHES
       default:
         return <div>Select a tab</div>;
     }
@@ -45,35 +47,35 @@ function Dashboard({ username, onLogout }) {
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
 
-      {/* SIDEBAR CONTAINING NAVIGATION BUTTONS */}
+      {/* SIDEBAR NAVIGATION MENU */}
       <div style={{ width: '200px', borderRight: '2px solid black', padding: '20px' }}>
         <h3>Atlas Financial</h3>
         <hr />
 
         <ul style={{ listStyleType: 'none', padding: 0 }}>
-          
-          {/* SWITCHES TO MAIN DASHBOARD TAB */}
+
+          {/* BUTTON TO OPEN DASHBOARD TAB */}
           <li style={{ marginBottom: '10px' }}>
             <button onClick={() => setActiveTab('dashboard')} disabled={activeTab === 'dashboard'}>
               Dashboard
             </button>
           </li>
 
-          {/* SWITCHES TO APPLICANTS TAB */}
+          {/* BUTTON TO OPEN APPLICANTS TAB */}
           <li style={{ marginBottom: '10px' }}>
             <button onClick={() => setActiveTab('applicants')} disabled={activeTab === 'applicants'}>
               Applicant Database
             </button>
           </li>
 
-          {/* SWITCHES TO AI TAB */}
+          {/* BUTTON TO OPEN AI TAB */}
           <li style={{ marginBottom: '10px' }}>
             <button onClick={() => setActiveTab('ai')} disabled={activeTab === 'ai'}>
               AI Underwriter
             </button>
           </li>
 
-          {/* SWITCHES TO SETTINGS TAB */}
+          {/* BUTTON TO OPEN SETTINGS TAB */}
           <li style={{ marginBottom: '10px' }}>
             <button onClick={() => setActiveTab('settings')} disabled={activeTab === 'settings'}>
               Settings
@@ -82,7 +84,7 @@ function Dashboard({ username, onLogout }) {
         </ul>
       </div>
 
-      {/* MAIN CONTENT AREA THAT DISPLAYS SELECTED TAB */}
+      {/* MAIN CONTENT DISPLAY AREA */}
       <div style={{ flex: 1, padding: '20px' }}>
         {renderContent()}
       </div>
