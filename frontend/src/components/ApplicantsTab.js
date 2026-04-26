@@ -65,7 +65,7 @@ function ApplicantsTab() {
 
   return (
     <div>
-      <h2>📁 Applicant Database (CRUD)</h2>
+      <h2> Applicant Database (CRUD)</h2>
       
       {/* FORM FOR ADDING NEW APPLICANT */}
       <div style={{ border: '1px solid black', padding: '10px', marginBottom: '20px' }}>

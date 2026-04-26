@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import ApplicantsTab from './ApplicantsTab';
+import DashboardTab from './DashboardTab';
 
 // MAIN DASHBOARD COMPONENT WITH TAB-BASED NAVIGATION
 function Dashboard({ username, onLogout }) {
 
-  // TRACKS CURRENTLY SELECTED DASHBOARD TAB
-  const [activeTab, setActiveTab] = useState('market');
+  // TRACKS CURRENTLY SELECTED DASHBOARD TAB (Changed default to 'dashboard')
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   // RENDERS CONTENT BASED ON ACTIVE TAB SELECTION
   const renderContent = () => {
     switch (activeTab) {
 
-      // DISPLAYS MARKET OVERVIEW SECTION
-      case 'market':
-        return <div><h2> Market Overview</h2><p>Live API data will go here.</p></div>;
+      // DISPLAYS THE MAIN DASHBOARD TAB
+      case 'dashboard':
+        return <DashboardTab />;
 
       // DISPLAYS APPLICANT DATABASE SECTION
-     case 'applicants':
-     return <ApplicantsTab />;
+      case 'applicants':
+        return <ApplicantsTab />;
 
       // DISPLAYS AI UNDERWRITER SECTION
       case 'ai':
@@ -29,8 +30,6 @@ function Dashboard({ username, onLogout }) {
           <div>
             <h2> Officer Settings</h2>
             <p>Logged in as: <strong>{username}</strong></p>
-
-            {/* LOGOUT BUTTON TRIGGERS SESSION RESET */}
             <button onClick={onLogout} style={{ marginTop: '10px', color: 'red' }}>
               Secure Log Out
             </button>
@@ -51,13 +50,12 @@ function Dashboard({ username, onLogout }) {
         <h3>Atlas Financial</h3>
         <hr />
 
-        {/* NAVIGATION BUTTON LIST */}
         <ul style={{ listStyleType: 'none', padding: 0 }}>
-
-          {/* SWITCHES TO MARKET TAB */}
+          
+          {/* SWITCHES TO MAIN DASHBOARD TAB */}
           <li style={{ marginBottom: '10px' }}>
-            <button onClick={() => setActiveTab('market')} disabled={activeTab === 'market'}>
-              Market Overview
+            <button onClick={() => setActiveTab('dashboard')} disabled={activeTab === 'dashboard'}>
+              Dashboard
             </button>
           </li>
 
