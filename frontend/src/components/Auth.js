@@ -31,7 +31,7 @@ function Auth({ onLoginSuccess }) {
       setMessage(response.data);
 
       // GRANTS ACCESS IF LOGIN IS SUCCESSFUL
-      if (isLogin && response.data === "Login successful!") {
+      if (isLogin && response.data === "Login successful") {
         onLoginSuccess(username);
       }
 

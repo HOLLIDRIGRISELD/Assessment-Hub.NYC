@@ -46,8 +46,8 @@ public class AuthController {
         // VALIDATES PASSWORD AGAINST STORED HASH
         if (user.isPresent() &&
                 passwordEncoder.matches(loginDetails.getPassword(), user.get().getPassword())) {
-            return ResponseEntity.ok("Login successful!");
+            return ResponseEntity.ok("Login successful");
         }
-        return ResponseEntity.badRequest().body("Error: Invalid username or password!");
+        return ResponseEntity.badRequest().body("Error: Invalid username or password");
     }
 }

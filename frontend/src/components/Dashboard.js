@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ApplicantsTab from './ApplicantsTab';
 
 // MAIN DASHBOARD COMPONENT WITH TAB-BASED NAVIGATION
 function Dashboard({ username, onLogout }) {
@@ -15,8 +16,8 @@ function Dashboard({ username, onLogout }) {
         return <div><h2> Market Overview</h2><p>Live API data will go here.</p></div>;
 
       // DISPLAYS APPLICANT DATABASE SECTION
-      case 'applicants':
-        return <div><h2> Applicant Database</h2><p>CRUD data table will go here.</p></div>;
+     case 'applicants':
+     return <ApplicantsTab />;
 
       // DISPLAYS AI UNDERWRITER SECTION
       case 'ai':
