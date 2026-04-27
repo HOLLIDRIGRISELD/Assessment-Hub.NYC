@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ApplicantsTab from './ApplicantsTab';
+import AiTab from './AiTab';
 import DashboardTab from './DashboardTab';
 
 // MAIN DASHBOARD COMPONENT WITH TAB-BASED NAVIGATION
@@ -22,7 +23,7 @@ function Dashboard({ username, onLogout }) {
 
       // DISPLAYS PLACEHOLDER FOR AI FEATURE
       case 'ai':
-        return <div><h2> AI Underwriter</h2><p>Python AI connection will go here.</p></div>;
+        return <AiTab />;
 
       // DISPLAYS USER INFO AND LOGOUT OPTION
       case 'settings':
