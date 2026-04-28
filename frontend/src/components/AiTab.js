@@ -1,30 +1,37 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Box, Typography, Card, CardContent, TextField, Button, CircularProgress, Divider } from '@mui/material';
 
-// HANDLES AI-BASED LOAN ANALYSIS AND DATABASE INTEGRATION
+// ICONS
+import SendIcon from '@mui/icons-material/Send';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+
+// AI UNDERWRITER COMPONENT
 function AiTab() {
 
-  // STORES USER INPUT FOR APPLICANT DETAILS
+  // USER INPUT DATA
   const [name, setName] = useState('');
   const [income, setIncome] = useState('');
   const [credit, setCredit] = useState('');
   const [loan, setLoan] = useState('');
 
-  // MANAGES UI STATE FOR LOADING, RESULT, AND ERRORS
+  // LOADING RESULTS AMD ERROR HANDLING
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
 
-  // HANDLES FULL AI ANALYSIS WORKFLOW (PYTHON + JAVA)
+  // MAIN AI ANALYSIS FUNCTION
   const handleAnalysis = async (e) => {
     e.preventDefault();
+
+    // RESET UI STATE BEFORE NEW REQUEST
     setLoading(true);
     setError('');
     setResult(null);
 
     try {
-
-      // REQUESTS AI PREDICTION FROM PYTHON MICROSERVICE
+      // CALL PYTHON AI MICROSERVICE (MODEL PREDICTION)
       const pythonResponse = await axios.post('http://localhost:5000/api/predict', {
         annualIncome: parseFloat(income),
         creditScore: parseInt(credit),
@@ -33,9 +40,9 @@ function AiTab() {
 
       const aiVerdict = pythonResponse.data.aiClassification;
 
-      // STORES RESULT IN JAVA BACKEND DATABASE
+      // SAVE RESULT TO JAVA BACKEND DATABASE
       await axios.post('http://localhost:8080/api/applicants', {
-        name: name,
+        name,
         annualIncome: parseFloat(income),
         creditScore: parseInt(credit),
         loanAmount: parseFloat(loan),
@@ -43,95 +50,199 @@ function AiTab() {
         aiClassification: aiVerdict
       });
 
-      // UPDATES UI WITH FINAL RESULT
+      // UPDATE UI WITH AI RESULT
       setResult(aiVerdict);
       setLoading(false);
 
-      // RESETS FORM INPUTS
+      // CLEAR FORM AFTER SUCCESSFUL SUBMISSION
       setName('');
       setIncome('');
       setCredit('');
       setLoan('');
 
     } catch (err) {
-      console.error(err);
-
-      // HANDLES NETWORK OR SERVER ERRORS
-      setError("Network Error: Make sure both your Python server (5000) and Java server (8080) are running!");
+      // HANDLE NETWORK OR SERVER FAILURES
+      setError("Network Error: Ensure Python and Java are running.");
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h2> AI Underwriter (Random Forest Model)</h2>
-      <p>Enter the applicant's details below to run a live prediction.</p>
+    <Box sx={{ width: '100%' }}>
 
-      <div style={{ display: 'flex', gap: '40px', marginTop: '20px' }}>
+      {/* PAGE HEADER */}
+      <Typography variant="h4" color="primary.dark" fontWeight="bold" gutterBottom>
+        AI Underwriter
+      </Typography>
 
-        {/* INPUT FORM FOR APPLICANT DATA */}
-        <div style={{ border: '1px solid black', padding: '20px', width: '300px' }}>
-          <h3>Applicant Details</h3>
+      <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 4 }}>
+        Enter the applicant's financial details below to run a live Machine Learning prediction.
+      </Typography>
 
-          <form onSubmit={handleAnalysis}>
+      {/* MAIN LAYOUT CONTAINER */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', lg: 'row' },
+          gap: 4,
+          alignItems: 'stretch'
+        }}
+      >
 
-            {/* NAME INPUT FIELD */}
-            <div style={{ marginBottom: '10px' }}>
-              <label>Full Name: </label><br />
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
-            </div>
+        {/* LEFT PANEL: INPUT FORM */}
+        <Card sx={{ flex: 1, borderRadius: 3, boxShadow: 2 }}>
+          <CardContent sx={{ p: 4 }}>
 
-            {/* INCOME INPUT FIELD */}
-            <div style={{ marginBottom: '10px' }}>
-              <label>Annual Income ($): </label><br />
-              <input type="number" value={income} onChange={(e) => setIncome(e.target.value)} required />
-            </div>
+            <Typography variant="h6" fontWeight="bold" color="primary.dark" gutterBottom>
+              Applicant Details
+            </Typography>
 
-            {/* CREDIT SCORE INPUT FIELD */}
-            <div style={{ marginBottom: '10px' }}>
-              <label>Credit Score (300-850): </label><br />
-              <input type="number" value={credit} onChange={(e) => setCredit(e.target.value)} required />
-            </div>
+            <Divider sx={{ mb: 3 }} />
 
-            {/* LOAN AMOUNT INPUT FIELD */}
-            <div style={{ marginBottom: '10px' }}>
-              <label>Loan Amount ($): </label><br />
-              <input type="number" value={loan} onChange={(e) => setLoan(e.target.value)} required />
-            </div>
+            <form onSubmit={handleAnalysis}>
 
-            {/* SUBMIT BUTTON FOR AI ANALYSIS */}
-            <button type="submit" disabled={loading} style={{ marginTop: '10px', padding: '10px', fontWeight: 'bold' }}>
-              {loading ? 'Running AI Analysis...' : 'Run AI Analysis'}
-            </button>
-          </form>
-        </div>
+              {/* NAME INPUT */}
+              <TextField
+                fullWidth
+                label="Full Name"
+                sx={{ mb: 2 }}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
 
-        {/* DISPLAYS AI RESULT AND STATUS */}
-        <div style={{ border: '2px dashed gray', padding: '20px', width: '300px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <h3>AI Verdict</h3>
+              {/* INCOME INPUT */}
+              <TextField
+                fullWidth
+                label="Annual Income ($)"
+                type="number"
+                sx={{ mb: 2 }}
+                value={income}
+                onChange={(e) => setIncome(e.target.value)}
+                required
+              />
 
-          {/* SHOWS LOADING STATE */}
-          {loading && <p>Processing millions of data points...</p>}
+              {/* CREDIT SCORE INPUT */}
+              <TextField
+                fullWidth
+                label="Credit Score (300-850)"
+                type="number"
+                sx={{ mb: 2 }}
+                value={credit}
+                onChange={(e) => setCredit(e.target.value)}
+                required
+              />
 
-          {/* SHOWS ERROR MESSAGE */}
-          {error && <p style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
+              {/* LOAN INPUT */}
+              <TextField
+                fullWidth
+                label="Loan Amount Request ($)"
+                type="number"
+                sx={{ mb: 4 }}
+                value={loan}
+                onChange={(e) => setLoan(e.target.value)}
+                required
+              />
 
-          {/* SHOWS DEFAULT STATE BEFORE INPUT */}
-          {!loading && !result && !error && <p style={{ color: 'gray' }}>Waiting for data input...</p>}
+              {/* SUBMIT BUTTON */}
+              <Button
+                fullWidth
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={loading}
+                endIcon={<SendIcon />}
+                sx={{ py: 1.5, borderRadius: 2 }}
+              >
+                {loading ? 'Running Analysis...' : 'Run AI Analysis'}
+              </Button>
 
-          {/* SHOWS FINAL AI RESULT */}
-          {result && (
-            <div>
-              <h1 style={{ color: result === 'Approved' ? 'green' : 'red', fontSize: '36px', margin: '10px 0' }}>
-                {result.toUpperCase()}
-              </h1>
-              <p>Decision saved to applicant database.</p>
-            </div>
-          )}
-        </div>
+            </form>
 
-      </div>
-    </div>
+          </CardContent>
+        </Card>
+
+        {/* RIGHT PANEL: RESULT DISPLAY */}
+        <Card
+          sx={{
+            flex: 1,
+            borderRadius: 3,
+            boxShadow: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor:
+              result === 'Approved'
+                ? '#f1f8e9'
+                : result === 'Denied'
+                ? '#ffebee'
+                : '#fafafa'
+          }}
+        >
+
+          <CardContent sx={{ textAlign: 'center', width: '100%', p: 4 }}>
+
+            {/* RESULT TITLE */}
+            <Typography variant="h5" color="text.secondary" fontWeight="bold" gutterBottom>
+              AI Verdict
+            </Typography>
+
+            {/* INITIAL STATE */}
+            {!loading && !result && !error && (
+              <Typography variant="body1" color="text.disabled" sx={{ mt: 2 }}>
+                Waiting for data input...
+              </Typography>
+            )}
+
+            {/* LOADING STATE */}
+            {loading && (
+              <Box sx={{ mt: 4 }}>
+                <CircularProgress size={60} />
+                <Typography variant="body1" sx={{ mt: 3, color: 'primary.main', fontWeight: 'bold' }}>
+                  Processing...
+                </Typography>
+              </Box>
+            )}
+
+            {/* ERROR STATE */}
+            {error && (
+              <Typography color="error" sx={{ mt: 2, fontWeight: 'bold' }}>
+                {error}
+              </Typography>
+            )}
+
+            {/* RESULT STATE */}
+            {result && (
+              <Box sx={{ mt: 2 }}>
+
+                {/* ICON BASED ON RESULT */}
+                {result === 'Approved' ? (
+                  <CheckCircleOutlinedIcon color="success" sx={{ fontSize: 100 }} />
+                ) : (
+                  <HighlightOffIcon color="error" sx={{ fontSize: 100 }} />
+                )}
+
+                {/* RESULT TEXT */}
+                <Typography
+                  variant="h3"
+                  fontWeight="bold"
+                  sx={{
+                    mt: 2,
+                    color: result === 'Approved' ? 'success.dark' : 'error.dark'
+                  }}
+                >
+                  {result.toUpperCase()}
+                </Typography>
+
+              </Box>
+            )}
+
+          </CardContent>
+        </Card>
+
+      </Box>
+    </Box>
   );
 }
 

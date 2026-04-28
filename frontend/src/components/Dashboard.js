@@ -1,96 +1,147 @@
 import React, { useState } from 'react';
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Divider, Button } from '@mui/material';
+
+// IMPORTS ICONS FOR SIDEBAR NAVIGATION
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
+
+// IMPORTS TAB COMPONENTS FOR EACH SECTION
+import DashboardTab from './DashboardTab';
 import ApplicantsTab from './ApplicantsTab';
 import AiTab from './AiTab';
-import DashboardTab from './DashboardTab';
+import SettingsTab from './SettingsTab';
 
-// MAIN DASHBOARD COMPONENT WITH TAB-BASED NAVIGATION
+// DEFINES FIXED WIDTH FOR SIDEBAR
+const drawerWidth = 260;
+
+// MAIN DASHBOARD COMPONENT WITH SIDEBAR NAVIGATION
 function Dashboard({ username, onLogout }) {
 
-  // TRACKS CURRENTLY ACTIVE TAB (DEFAULT SET TO DASHBOARD)
+  // TRACKS CURRENTLY ACTIVE TAB
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // SELECTS AND RENDERS CONTENT BASED ON ACTIVE TAB
+  // RENDERS CONTENT BASED ON SELECTED TAB
   const renderContent = () => {
     switch (activeTab) {
 
-      // DISPLAYS MAIN DASHBOARD WITH LIVE DATA
-      case 'dashboard':
-        return <DashboardTab />;
+      // DISPLAYS MAIN DASHBOARD VIEW
+      case 'dashboard': return <DashboardTab />;
 
-      // DISPLAYS APPLICANT MANAGEMENT INTERFACE
-      case 'applicants':
-        return <ApplicantsTab />;
+      // DISPLAYS APPLICANT MANAGEMENT TABLE
+      case 'applicants': return <ApplicantsTab />;
 
-      // DISPLAYS PLACEHOLDER FOR AI FEATURE
-      case 'ai':
-        return <AiTab />;
+      // DISPLAYS AI ANALYSIS TOOL
+      case 'ai': return <AiTab />;
 
-      // DISPLAYS USER INFO AND LOGOUT OPTION
-      case 'settings':
-        return (
-          <div>
-            <h2> Officer Settings</h2>
-            <p>Logged in as: <strong>{username}</strong></p>
+      // DISPLAYS USER SETTINGS AND LOGOUT OPTION
+      case 'settings': return <SettingsTab username={username} onLogout={onLogout} />;
 
-            {/* TRIGGERS USER LOGOUT */}
-            <button onClick={onLogout} style={{ marginTop: '10px', color: 'red' }}>
-              Secure Log Out
-            </button>
-          </div>
-        );
-
-      // FALLBACK CONTENT IF NO TAB MATCHES
-      default:
-        return <div>Select a tab</div>;
+      // DEFAULT FALLBACK CONTENT
+      default: return <Typography>Select a tab</Typography>;
     }
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
+    <Box sx={{ display: 'flex', height: '100vh' }}>
 
-      {/* SIDEBAR NAVIGATION MENU */}
-      <div style={{ width: '200px', borderRight: '2px solid black', padding: '20px' }}>
-        <h3>Atlas Financial</h3>
-        <hr />
+      {/* LEFT SIDEBAR USING MATERIAL UI DRAWER */}
+      <Drawer
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            backgroundColor: 'primary.dark',
+            color: 'white',
+          },
+        }}
+        variant="permanent"
+        anchor="left"
+      >
 
-        <ul style={{ listStyleType: 'none', padding: 0 }}>
+        {/* APPLICATION TITLE / LOGO SECTION */}
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h5" sx={{ fontWeight: 'bold', letterSpacing: 1 }}>
+            Assess-AI
+          </Typography>
+        </Box>
 
-          {/* BUTTON TO OPEN DASHBOARD TAB */}
-          <li style={{ marginBottom: '10px' }}>
-            <button onClick={() => setActiveTab('dashboard')} disabled={activeTab === 'dashboard'}>
-              Dashboard
-            </button>
-          </li>
+        <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
 
-          {/* BUTTON TO OPEN APPLICANTS TAB */}
-          <li style={{ marginBottom: '10px' }}>
-            <button onClick={() => setActiveTab('applicants')} disabled={activeTab === 'applicants'}>
-              Applicant Database
-            </button>
-          </li>
+        {/* SIDEBAR NAVIGATION MENU */}
+        <List sx={{ mt: 2, px: 2 }}>
+          {[
+            { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+            { id: 'applicants', label: 'Applicant Database', icon: <PeopleIcon /> },
+            { id: 'ai', label: 'AI Underwriter', icon: <PsychologyIcon /> },
+            { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
+          ].map((item) => (
 
-          {/* BUTTON TO OPEN AI TAB */}
-          <li style={{ marginBottom: '10px' }}>
-            <button onClick={() => setActiveTab('ai')} disabled={activeTab === 'ai'}>
-              AI Underwriter
-            </button>
-          </li>
+            // RENDERS EACH NAVIGATION ITEM
+            <ListItem key={item.id} disablePadding sx={{ mb: 1 }}>
 
-          {/* BUTTON TO OPEN SETTINGS TAB */}
-          <li style={{ marginBottom: '10px' }}>
-            <button onClick={() => setActiveTab('settings')} disabled={activeTab === 'settings'}>
-              Settings
-            </button>
-          </li>
-        </ul>
-      </div>
+              <ListItemButton 
+                selected={activeTab === item.id}
+                onClick={() => setActiveTab(item.id)}
+                sx={{
+                  borderRadius: 2,
 
-      {/* MAIN CONTENT DISPLAY AREA */}
-      <div style={{ flex: 1, padding: '20px' }}>
+                  // STYLING FOR ACTIVE SELECTED ITEM
+                  '&.Mui-selected': {
+                    backgroundColor: 'secondary.main',
+                    color: 'primary.dark',
+                    '& .MuiListItemIcon-root': { color: 'primary.dark' }
+                  },
+
+                  // STYLING FOR HOVER EFFECT
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  }
+                }}
+              >
+
+                {/* ICON DISPLAY FOR EACH TAB */}
+                <ListItemIcon 
+                  sx={{ 
+                    color: activeTab === item.id ? 'primary.dark' : 'white', 
+                    minWidth: 40 
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+
+                {/* LABEL TEXT FOR EACH TAB */}
+                <ListItemText 
+                  primary={item.label} 
+                  primaryTypographyProps={{ fontWeight: 500 }} 
+                />
+
+              </ListItemButton>
+
+            </ListItem>
+          ))}
+        </List>
+
+      </Drawer>
+
+      {/* MAIN CONTENT AREA DISPLAYING ACTIVE TAB */}
+      <Box 
+        component="main" 
+        sx={{ 
+          flexGrow: 1, 
+          p: 4, 
+          backgroundColor: 'background.default', 
+          overflow: 'auto' 
+        }}
+      >
         {renderContent()}
-      </div>
+      </Box>
 
-    </div>
+    </Box>
   );
 }
 

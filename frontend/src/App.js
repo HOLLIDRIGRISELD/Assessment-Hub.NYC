@@ -1,24 +1,60 @@
 import React, { useState } from 'react';
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
 
-// MAIN APPLICATION COMPONENT HANDLING AUTH FLOW AND VIEW SWITCHING
+// DEFINES GLOBAL UI THEME WITH COLORS, TYPOGRAPHY AND SHAPE SETTINGS
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+      dark: '#115293',
+    },
+    secondary: {
+      main: '#90caf9',
+    },
+    background: {
+      default: '#f4f6f8',
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  shape: {
+    borderRadius: 12,
+  },
+});
+
+// MAIN APPLICATION COMPONENT HANDLING AUTHENTICATION FLOW
 function App() {
 
   // STORES CURRENTLY LOGGED IN USER
   const [loggedInUser, setLoggedInUser] = useState(null);
 
-  // DISPLAYS AUTH COMPONENT IF USER IS NOT LOGGED IN
-  if (!loggedInUser) {
-    return <Auth onLoginSuccess={setLoggedInUser} />;
-  }
-
-  // DISPLAYS DASHBOARD AND PASSES USER DATA AND LOGOUT FUNCTION
   return (
-    <Dashboard 
-      username={loggedInUser} 
-      onLogout={() => setLoggedInUser(null)} 
-    />
+
+    // WRAPS ENTIRE APP WITH MATERIAL UI THEME
+    <ThemeProvider theme={theme}>
+
+      {/* NORMALIZES DEFAULT BROWSER STYLES */}
+      <CssBaseline />
+
+      {/* CONDITIONAL RENDERING BASED ON LOGIN STATE */}
+      {!loggedInUser ? (
+
+        // SHOWS AUTH SCREEN IF USER NOT LOGGED IN
+        <Auth onLoginSuccess={setLoggedInUser} />
+
+      ) : (
+
+        // SHOWS DASHBOARD IF USER IS AUTHENTICATED
+        <Dashboard 
+          username={loggedInUser} 
+          onLogout={() => setLoggedInUser(null)} 
+        />
+
+      )}
+    </ThemeProvider>
   );
 }
 
