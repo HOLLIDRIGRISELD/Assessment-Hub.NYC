@@ -28,31 +28,37 @@ const theme = createTheme({
 // MAIN APPLICATION COMPONENT HANDLING AUTHENTICATION FLOW
 function App() {
 
-  // STORES CURRENTLY LOGGED IN USER
-  const [loggedInUser, setLoggedInUser] = useState(null);
+  // CHECK LOCAL STORAGE FIRST ON BOOT
+  const [loggedInUser, setLoggedInUser] = useState(localStorage.getItem('assess_ai_user') || null);
+
+  // HANDLES SAVING USER TO BROWSER MEMORY
+  const handleLogin = (username) => {
+    localStorage.setItem('assess_ai_user', username);
+    setLoggedInUser(username);
+  };
+
+  // HANDLES WIPING USER FROM BROWSER MEMORY
+  const handleLogout = () => {
+    localStorage.removeItem('assess_ai_user');
+    setLoggedInUser(null);
+  };
 
   return (
-
     // WRAPS ENTIRE APP WITH MATERIAL UI THEME
     <ThemeProvider theme={theme}>
-
       {/* NORMALIZES DEFAULT BROWSER STYLES */}
       <CssBaseline />
 
       {/* CONDITIONAL RENDERING BASED ON LOGIN STATE */}
       {!loggedInUser ? (
-
         // SHOWS AUTH SCREEN IF USER NOT LOGGED IN
-        <Auth onLoginSuccess={setLoggedInUser} />
-
+        <Auth onLoginSuccess={handleLogin} />
       ) : (
-
         // SHOWS DASHBOARD IF USER IS AUTHENTICATED
         <Dashboard 
           username={loggedInUser} 
-          onLogout={() => setLoggedInUser(null)} 
+          onLogout={handleLogout} 
         />
-
       )}
     </ThemeProvider>
   );

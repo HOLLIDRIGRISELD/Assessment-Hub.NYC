@@ -3,3 +3,9 @@ __pycache__/
 *.pkl
 target/
 .env
+Backend/target/
+db_data/
+Ai-Model/venv/
+Ai-Model/__pycache__/
+Ai-Model/loan_model.pkl
+Frontend/node_modules/
