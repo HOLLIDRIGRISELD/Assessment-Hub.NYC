@@ -1,7 +1,4 @@
-node_modules/
 __pycache__/
-*.pkl
-target/
 .env
 Backend/target/
 db_data/
