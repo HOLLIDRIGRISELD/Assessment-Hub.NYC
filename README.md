@@ -34,3 +34,4 @@ MYSQL_DATABASE=assess_ai
 MYSQL_USER=springuser
 MYSQL_PASSWORD= A Password
 MYSQL_ROOT_PASSWORD= A Password
+

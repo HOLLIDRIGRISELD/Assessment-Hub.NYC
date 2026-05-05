@@ -31,21 +31,55 @@ function ApplicantsTab() {
     fetchApplicants();
   }, []);
 
-  // FETCHES ALL APPLICANTS FROM BACKEND API
+  // HANDLES ALL API REQUESTS WITH FAILOVER BETWEEN DROPLET AND LOCALHOST
+  const smartRequest = async (method, endpoint, data = null) => {
+    let finalResponse = null;
+
+    try {
+      // ATTEMPTS REQUEST TO REMOTE SERVER
+      finalResponse = await axios({
+        method: method,
+        url: `http://206.81.22.189:8080${endpoint}`,
+        data: data
+      });
+
+    } catch (dropletError) {
+
+      // FALLBACK TO LOCAL SERVER IF REMOTE FAILS
+      console.warn(`Droplet unreachable for ${method}. Trying Localhost...`);
+      try {
+        finalResponse = await axios({
+          method: method,
+          url: `http://localhost:8080${endpoint}`,
+          data: data
+        });
+      } catch (localError) {
+        console.error(`Both servers down for ${endpoint}`);
+        throw localError;
+      }
+
+    } finally {
+      // LOGS COMPLETION OF NETWORK REQUEST
+      console.log(`Network request (${method}) to ${endpoint} finished.`);
+    }
+
+    return finalResponse;
+  };
+
+  // FETCHES ALL APPLICANTS FROM BACKEND
   const fetchApplicants = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/applicants');
-      setApplicants(response.data);
+      const response = await smartRequest('GET', '/api/applicants');
+      if (response) setApplicants(response.data);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
   };
 
-  // HANDLES CREATE OR UPDATE FORM SUBMISSION
+  // HANDLES CREATE OR UPDATE OF APPLICANT
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // PREPARES DATA OBJECT FOR APO REQUEST
     const payload = {
       name,
       annualIncome: parseFloat(income),
@@ -57,13 +91,13 @@ function ApplicantsTab() {
 
     try {
       if (editingId) {
-        // SENDS UPDATE REQUEST FOR EXISTING APPLICANT
-        await axios.put(`http://localhost:8080/api/applicants/${editingId}`, payload);
+        // UPDATES EXISTING APPLICANT
+        await smartRequest('PUT', `/api/applicants/${editingId}`, payload);
       } else {
-        // SENDS CREATE REQUEST FOR NEW APPLICANT
-        await axios.post('http://localhost:8080/api/applicants', payload);
+        // CREATES NEW APPLICANT
+        await smartRequest('POST', '/api/applicants', payload);
       }
-
+      
       // RESETS FORM AND REFRESHES DATA
       resetForm();
       fetchApplicants(); 
@@ -72,17 +106,17 @@ function ApplicantsTab() {
     }
   };
 
-  // HANDLES DELETING AN APPLICANT
+  // DELETES APPLICANT BY ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/applicants/${id}`);
+      await smartRequest('DELETE', `/api/applicants/${id}`);
       fetchApplicants();
     } catch (error) {
       console.error("Error deleting applicant: ", error);
     }
   };
 
-  // LOADS SELECTED APPLICANT DATA INTO FORM FOR EDITING
+  // LOADS SELECTED APPLICANT INTO FORM FOR EDITING
   const handleEditClick = (applicant) => {
     setEditingId(applicant.id);
     setName(applicant.name);
@@ -93,26 +127,30 @@ function ApplicantsTab() {
     setAiClass(applicant.aiClassification);
   };
 
-  // RESETS FORM TO DEFAULT VALUES
+  // RESETS FORM TO DEFAULT STATE
   const resetForm = () => {
     setEditingId(null);
-    setName(''); setIncome(''); setCredit(''); setLoan('');
-    setStatus('Pending'); setAiClass('Not Analyzed');
+    setName('');
+    setIncome('');
+    setCredit('');
+    setLoan('');
+    setStatus('Pending');
+    setAiClass('Not Analyzed');
   };
 
   return (
     <Box>
 
-      {/* PAGE TITLE */}
+      {/* DISPLAYS PAGE TITLE */}
       <Typography variant="h4" color="primary.dark" fontWeight="bold" gutterBottom>
         Applicant Database
       </Typography>
       
-      {/* FORM CARD FOR CREATE AND UPDATE */}
+      {/* FORM CARD FOR ADDING OR EDITING APPLICANTS */}
       <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 2, backgroundColor: editingId ? '#fff8e1' : 'white' }}>
         <CardContent>
 
-          {/* DYNAMIC FORM TITLE */}
+          {/* SHOWS CURRENT MODE (ADD OR EDIT) */}
           <Typography variant="h6" color="text.secondary" gutterBottom>
             {editingId ? `Editing Applicant ID: ${editingId}` : 'Add New Applicant'}
           </Typography>
@@ -120,18 +158,18 @@ function ApplicantsTab() {
           <form onSubmit={handleSubmit}>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mt: 2 }}>
 
-              {/* INPUT FIELDS */}
-              <TextField label="Full Name" variant="outlined" size="small" value={name} onChange={e => setName(e.target.value)} required />
-              <TextField label="Annual Income" type="number" variant="outlined" size="small" value={income} onChange={e => setIncome(e.target.value)} required />
-              <TextField label="Credit Score" type="number" variant="outlined" size="small" value={credit} onChange={e => setCredit(e.target.value)} required />
-              <TextField label="Loan Amount" type="number" variant="outlined" size="small" value={loan} onChange={e => setLoan(e.target.value)} required />
+              {/* INPUT FIELDS FOR APPLICANT DATA */}
+              <TextField label="Full Name" size="small" value={name} onChange={e => setName(e.target.value)} required />
+              <TextField label="Annual Income" type="number" size="small" value={income} onChange={e => setIncome(e.target.value)} required />
+              <TextField label="Credit Score" type="number" size="small" value={credit} onChange={e => setCredit(e.target.value)} required />
+              <TextField label="Loan Amount" type="number" size="small" value={loan} onChange={e => setLoan(e.target.value)} required />
               
-              {/* SAVE OR UPDATE BUTTON */}
+              {/* BUTTON TO SAVE OR UPDATE APPLICANT */}
               <Button type="submit" variant="contained" color={editingId ? "warning" : "primary"} startIcon={<SaveIcon />} sx={{ height: '40px' }}>
                 {editingId ? 'Update' : 'Save'}
               </Button>
               
-              {/* CANCEL BUTTON */}
+              {/* BUTTON TO CANCEL EDIT MODE */}
               {editingId && (
                 <Button variant="outlined" color="error" onClick={resetForm} startIcon={<CancelIcon />} sx={{ height: '40px' }}>
                   Cancel
@@ -142,11 +180,11 @@ function ApplicantsTab() {
         </CardContent>
       </Card>
 
-      {/* TABLE DISPLAYING APPLICANTS DATA */}
+      {/* TABLE DISPLAYING ALL APPLICANTS */}
       <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
         <Table sx={{ minWidth: 650 }}>
 
-          {/* TABLE HEADER */}
+          {/* TABLE HEADER ROW */}
           <TableHead sx={{ backgroundColor: 'primary.main' }}>
             <TableRow>
               <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>ID</TableCell>
@@ -159,19 +197,19 @@ function ApplicantsTab() {
             </TableRow>
           </TableHead>
 
-          {/* TABLE BODY WITH DATA ROWS */}
+          {/* TABLE BODY WITH DYNAMIC DATA */}
           <TableBody>
             {applicants.map((app) => (
-              <TableRow key={app.id} sx={{ '&:last-child td, &:last-child th': { border: 0 }, '&:hover': { backgroundColor: '#f5f5f5' } }}>
+              <TableRow key={app.id} sx={{ '&:hover': { backgroundColor: '#f5f5f5' } }}>
 
-                {/* APPLICANT DATA CELLS */}
+                {/* DISPLAYS APPLICANT DATA */}
                 <TableCell>{app.id}</TableCell>
-                <TableCell fontWeight="bold">{app.name}</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>{app.name}</TableCell>
                 <TableCell>${app.annualIncome.toLocaleString()}</TableCell>
                 <TableCell>{app.creditScore}</TableCell>
                 <TableCell>${app.loanAmount.toLocaleString()}</TableCell>
 
-                {/* AI STATUS WITH COLOR INDICATOR */}
+                {/* DISPLAYS AI STATUS WITH COLOR CODING */}
                 <TableCell align="center">
                   <Chip 
                     label={app.aiClassification} 
@@ -186,10 +224,10 @@ function ApplicantsTab() {
 
                 {/* ACTION BUTTONS FOR EDIT AND DELETE */}
                 <TableCell align="center">
-                  <IconButton color="primary" onClick={() => handleEditClick(app)} title="Edit">
+                  <IconButton color="primary" onClick={() => handleEditClick(app)}>
                     <EditIcon />
                   </IconButton>
-                  <IconButton color="error" onClick={() => handleDelete(app.id)} title="Delete">
+                  <IconButton color="error" onClick={() => handleDelete(app.id)}>
                     <DeleteIcon />
                   </IconButton>
                 </TableCell>

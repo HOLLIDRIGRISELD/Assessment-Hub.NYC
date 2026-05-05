@@ -10,7 +10,7 @@ import java.util.Optional;
 // HANDLES USER AUTHENTICATION LOGIC
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"http://localhost:3000", "http://206.81.22.189", "http://206.81.22.189:3000"})
 public class AuthController {
     @Autowired
     // PROVIDES ACCESS TO USER DATABASE OPERATIONS

@@ -1,65 +1,89 @@
+// IMPORT REACT HOOKS AND REQUIRED LIBRARIES
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Box, Card, CardContent, Typography, TextField, Button, InputAdornment } from '@mui/material';
+
+// IMPORT ICONS FOR UI ENHANCEMENT
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 import LoginIcon from '@mui/icons-material/Login';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 
-// HANDLES USER AUTHENTICATION WITH LOGIN AND REGISTRATION MODES
+// AUTH COMPONENT HANDLING LOGIN AND REGISTRATION LOGIC
 function Auth({ onLoginSuccess }) {
 
-  // TRACKS CURRENT AUTH LOGIN OR REGISTER
+  // STORE CURRENT MODE (LOGIN OR REGISTER)
   const [isLogin, setIsLogin] = useState(true);
 
-  // STORES USER INPUT CREDENTIALS
+  // STORE USER INPUT DATA
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  // STORES SERVER RESPONSE MESSAGES
+  // STORE RESPONSE MESSAGE FROM SERVER
   const [message, setMessage] = useState('');
 
-  // HANDLES FORM SUBMISSION AND BACKEND COMMUNICATION
+  // HANDLE FORM SUBMISSION AND SERVER COMMUNICATION
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // SELECTS CORRECT ENDPOINT BASED ON MODE
+    // DETERMINE API ENDPOINT BASED ON MODE
     const endpoint = isLogin ? '/login' : '/register';
+    let response = null;
 
     try {
-
-      // SENDS AUTH REQUEST TO BACKENT
-      const response = await axios.post(`http://localhost:8080/api/auth${endpoint}`, {
+      // ATTEMPT AUTHENTICATION USING REMOTE SERVER
+      response = await axios.post(`http://206.81.22.189:8080/api/auth${endpoint}`, {
         username: username,
         password: password
       });
 
-      // DISPLAYS SUCESS MESSAGE FROM SERVER
+    } catch (dropletError) {
+
+      // HANDLE CASE WHERE REMOTE SERVER RESPONDS WITH ERROR
+      if (dropletError.response) {
+        setMessage(dropletError.response.data);
+        return;
+      }
+
+      // FALLBACK TO LOCAL SERVER IF REMOTE IS UNREACHABLE
+      console.warn("Droplet unreachable. Trying Localhost...");
+      try {
+        response = await axios.post(`http://localhost:8080/api/auth${endpoint}`, {
+          username: username,
+          password: password
+        });
+      } catch (localError) {
+
+        // HANDLE LOCAL SERVER FAILURE
+        if (localError.response) {
+          setMessage(localError.response.data);
+        } else {
+          setMessage("Server error. Both Droplet and Localhost are down.");
+        }
+        return;
+      }
+
+    } finally {
+      // LOG COMPLETION OF AUTH ATTEMPT
+      console.log(`Authentication attempt for ${username} finished.`);
+    }
+
+    // HANDLE SUCCESSFUL RESPONSE
+    if (response) {
       setMessage(response.data);
 
-      // HANDLES SUCCESSFUL LOGIN
+      // REDIRECT USER AFTER SUCCESSFUL LOGIN
       if (isLogin) {
         setTimeout(() => {
           onLoginSuccess(username);
         }, 500);
-      }
-
-    } catch (error) {
-
-      // HANDLES BACKEND VALIDATION ERRORS
-      if (error.response) {
-        setMessage(error.response.data);
-      } else {
-
-        // HANDLES NETWORK OR SERVER FAILURE
-        setMessage("Server error. Is the Java backend running?");
       }
     }
   };
 
   return (
 
-    // FULLSCREEN CONTAINER WITH CENTERED AUTH CARD 
+    // MAIN FULLSCREEN CONTAINER
     <Box 
       sx={{ 
         minHeight: '100vh', 
@@ -70,7 +94,7 @@ function Auth({ onLoginSuccess }) {
       }}
     >
 
-      {/* CARD CONTAINING AUTH FORM */}
+      {/* AUTHENTICATION CARD UI */}
       <Card 
         sx={{ 
           maxWidth: 400, 
@@ -82,6 +106,7 @@ function Auth({ onLoginSuccess }) {
         }}
       >
 
+        {/* CARD CONTENT AREA */}
         <CardContent sx={{ textAlign: 'center' }}>
 
           {/* APPLICATION TITLE */}
@@ -95,6 +120,7 @@ function Auth({ onLoginSuccess }) {
             WELCOME
           </Typography>
 
+          {/* AUTHENTICATION FORM */}
           <form onSubmit={handleSubmit}>
 
             {/* USERNAME INPUT FIELD */}
@@ -134,7 +160,7 @@ function Auth({ onLoginSuccess }) {
               }}
             />
 
-            {/* SUBMIT BUTTON FOR LOGIN OR REGISTER */}
+            {/* SUBMIT BUTTON */}
             <Button 
               fullWidth 
               type="submit" 
@@ -149,7 +175,7 @@ function Auth({ onLoginSuccess }) {
 
           </form>
 
-          {/* TOGGLES BETWEEN LOGIN AND REGISTER MODES */}
+          {/* TOGGLE BETWEEN LOGIN AND REGISTER MODES */}
           <Button 
             color="secondary" 
             onClick={() => setIsLogin(!isLogin)} 
@@ -158,7 +184,7 @@ function Auth({ onLoginSuccess }) {
             {isLogin ? "Need an account? Register here" : "Already have an account? Login"}
           </Button>
 
-          {/* DISPLAYS FEEDBACK MESSAGE TO USER */}
+          {/* DISPLAY SERVER RESPONSE MESSAGE */}
           {message && (
             <Typography 
               variant="body2" 
@@ -178,4 +204,5 @@ function Auth({ onLoginSuccess }) {
   );
 }
 
+// EXPORT COMPONENT FOR USE IN APP
 export default Auth;

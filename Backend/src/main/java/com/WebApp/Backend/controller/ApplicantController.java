@@ -10,8 +10,8 @@ import java.util.List;
 // HANDLES HTTP REQUESTS FOR APPLICANT DATA
 @RequestMapping("/api/applicants")
 // DEFINES BASE API ROUTE FOR APPLICANTS
-@CrossOrigin(origins = "*")
-// ALLOWS REQUESTS FROM ANY FRONTEND ORIGIN
+@CrossOrigin(origins = {"http://localhost:3000", "http://206.81.22.189", "http://206.81.22.189:3000"})
+// ALLOWS REQUESTS FROM SPECIFIED FRONTEND ORIGINS
 
 public class ApplicantController {
 
